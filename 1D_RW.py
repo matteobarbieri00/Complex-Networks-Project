@@ -55,7 +55,9 @@ for i in range(-L, L + 1):
     if i % 2 == 0:
         x.append(i)
         y.append(n_in_pos[i] / particles)
-
+er = []
+for i in y:
+    er.append(np.sqrt(i) / particles)
 
 # Recast xdata and ydata into numpy arrays so we can use their handy features
 xdata = np.asarray(x)
@@ -63,36 +65,64 @@ ydata = np.asarray(y)
 # plt.plot(xdata, ydata, "o")
 
 
-n = len(xdata)
-mean = sum(xdata * ydata) / n
-sigma = sum(ydata * (xdata - mean) ** 2) / n
+def do_only_hist():
+    # plt.scatter(xdata, ydata)
+    # errors
+    er = []
+    for i in y:
+        er.append(np.sqrt(i))
+
+    plt.xlabel("Position")
+    plt.ylabel("Occurrences")
+    plt.errorbar(x, y, er, fmt="o", ecolor="lightblue", elinewidth=1)
+
+    plt.grid(linestyle="--", linewidth=0.5)
+    plt.show()
 
 
-def gaus(x, a, x0, sigma):
-    return a * np.exp(-((x - x0) ** 2) / (2 * sigma**2))
+def do_fit():
+    n = len(xdata)
+    mean = sum(xdata * ydata) / n
+    sigma = sum(ydata * (xdata - mean) ** 2) / n
+
+    def gaus(x, a, x0, sigma):
+        return a * np.exp(-((x - x0) ** 2) / (2 * sigma**2))
+
+    popt, pcov = curve_fit(gaus, x, y, p0=[1, mean, sigma])
+
+    fig, ax = plt.subplots()
+    # ax.plot(x, y, "b+:", label="data")
+    ax.errorbar(
+        x, y, er, fmt="o", markersize=2, ecolor="lightblue", elinewidth=1, label="data"
+    )
+    ax.plot(x, gaus(x, *popt), linewidth=1, label="fit")
+    plt.legend()
+    # plt.title('Fig. 3 - Fit for Time Constant')
+    plt.xlabel("Position")
+    plt.ylabel("Probability")
+    plt.grid(linestyle="--", linewidth=0.5)
+    errs = np.sqrt(np.diag(pcov))
+    print(errs)
+    textstr = "\n".join(
+        (
+            r"$\mu=%.2f \pm %.2f$" % (popt[1], errs[1]),
+            r"$\sigma=%.2f \pm %.2f$" % (popt[2], errs[2]),
+        )
+    )
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+
+    # place a text box in upper left in axes coords
+    ax.text(
+        0.05,
+        0.95,
+        textstr,
+        transform=ax.transAxes,
+        fontsize=14,
+        verticalalignment="top",
+        bbox=props,
+    )
+    plt.show()
 
 
-popt, pcov = curve_fit(gaus, x, y, p0=[1, mean, sigma])
-
-fig, ax = plt.subplots()
-ax.plot(x, y, "b+:", label="data")
-ax.plot(x, gaus(x, *popt), "ro:", label="fit")
-plt.legend()
-# plt.title('Fig. 3 - Fit for Time Constant')
-plt.xlabel("Position")
-plt.ylabel("Probability")
-textstr = "\n".join((r"$\mu=%.2f$" % (popt[1],), r"$\sigma=%.2f$" % (popt[2],)))
-# these are matplotlib.patch.Patch properties
-props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
-
-# place a text box in upper left in axes coords
-ax.text(
-    0.05,
-    0.95,
-    textstr,
-    transform=ax.transAxes,
-    fontsize=14,
-    verticalalignment="top",
-    bbox=props,
-)
-plt.show()
+do_fit()
