@@ -68,7 +68,8 @@ H = (1 / np.sqrt(2)) * Qobj([[1, 1], [1, -1]])
 L = 100
 # init state |^ x 0
 init_pos = basis(2 * L + 1, int(L))
-init_coin = (1 / np.sqrt(2)) * (basis(2, 0) + basis(2, 1) * complex(0, 1))  # basis(2,1)
+# init_coin = basis(2, 1)
+init_coin = (1 / np.sqrt(2)) * (basis(2, 0) + basis(2, 1) * complex(0, 1))
 init_state = tensor(init_coin, init_pos)
 # s = coin_toss(init_state,H,L)
 # p = shift_operator(s,L)
@@ -118,28 +119,42 @@ def Reverse(lst):
 
 y = Reverse(y)
 
-xdata = np.asarray(x)
-ydata = np.asarray(y)
 
-mean = sum(xdata * ydata)
-sum_squared = sum((xdata**2) * ydata)
-std = np.sqrt(sum_squared - mean**2)
-fig, ax = plt.subplots()
-plt.xlabel("Position")
-plt.ylabel("Probability")
-textstr = "\n".join((r"$\mu=%.2f$" % (mean,), r"$\sigma=%.2f$" % (std,)))
-# these are matplotlib.patch.Patch properties
-props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+def do_hist():
+    plt.xlabel("Position")
+    plt.ylabel("Probability")
+    plt.grid(linestyle="--", linewidth=0.5)
+    plt.plot(x, y)
+    plt.show()
 
-# place a text box in upper left in axes coords
-ax.text(
-    0.40,
-    0.95,
-    textstr,
-    transform=ax.transAxes,
-    fontsize=14,
-    verticalalignment="top",
-    bbox=props,
-)
-ax.plot(x, y)
-plt.show()
+
+def do_analysis():
+    xdata = np.asarray(x)
+    ydata = np.asarray(y)
+
+    mean = sum(xdata * ydata)
+    sum_squared = sum((xdata**2) * ydata)
+    std = np.sqrt(sum_squared - mean**2)
+    fig, ax = plt.subplots()
+    plt.xlabel("Position")
+    plt.ylabel("Probability")
+    plt.grid(linestyle="--", linewidth=0.5)
+    textstr = "\n".join((r"$\mu=%.2f$" % (mean,), r"$\sigma=%.2f$" % (std,)))
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+
+    # place a text box in upper left in axes coords
+    ax.text(
+        0.40,
+        0.95,
+        textstr,
+        transform=ax.transAxes,
+        fontsize=14,
+        verticalalignment="top",
+        bbox=props,
+    )
+    ax.plot(x, y)
+    plt.show()
+
+
+do_hist()
